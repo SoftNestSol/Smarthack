@@ -117,10 +117,7 @@ class Connection:
             from_node.decrease_stock(amount)
 
 
-
-
 class Demand:
-
     def __init__(self, customer_id, amount, post_day, start_day, end_day):
         self.customer_id = customer_id
         self.amount = amount
@@ -132,12 +129,8 @@ class Demand:
     def set_priority(self, priority):
         self.priority = priority
 
-
     def partially_fullfill(self, amount):
         self.amount -= amount
-
-    
-
 
 
 class Customer:

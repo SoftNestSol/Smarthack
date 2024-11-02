@@ -2,9 +2,10 @@ import csv
 import os
 import requests
 
-from models import Refinery, Tank, Customer, Connection
+from models import Connection, Customer, Demand, Refinery, Tank
 
 API_KEY = "7bcd6334-bc2e-4cbf-b9d4-61cb9e868869"
+API_URL = "http://localhost:8080/api/v1"
 
 
 def read_csv_file(file_name):
@@ -12,6 +13,15 @@ def read_csv_file(file_name):
         reader = csv.DictReader(file, delimiter=";")
         data = [dict(row) for row in reader]
     return data
+
+
+def end_session():
+    url = API_URL + "/session/end"
+    requests.post(url, headers={"API-KEY": API_KEY})
+
+
+def solve(response):
+    print(response["totalKpis"])
 
 
 if __name__ == "__main__":
@@ -25,19 +35,20 @@ if __name__ == "__main__":
     refineries = [Refinery(**refinery) for refinery in refineries]
     tanks = [Tank(**tank) for tank in tanks]
 
-    session_id = requests.post(
-        "http://localhost:8080/api/v1/session/start", headers={"API-KEY": API_KEY}
-    ).content
+    url = API_URL + "/session/start"
+    session_id = requests.post(url, headers={"API-KEY": API_KEY}).content
 
     day = 0
     response = None
 
     while True:
         if day > 43:
+            end_session()
             break
 
         if day > 0:
-            solve(response)
+            solve(dict(response.json()))
+            break
 
         data = {
             "day": day,
@@ -45,18 +56,16 @@ if __name__ == "__main__":
         }
 
         try:
-            response = requests.post(
-                "http://localhost:8080/api/v1/play/round",
-                headers={
-                    "API-KEY": API_KEY,
-                    "SESSION-ID": session_id,
-                    "Content-Type": "application/json",
-                },
-                json=data,
-            )
-
+            url = API_URL + "/play/round"
+            headers = {
+                "API-KEY": API_KEY,
+                "SESSION-ID": session_id,
+                "Content-Type": "application/json",
+            }
+            response = requests.post(url, headers=headers, json=data)
             day = day + 1
 
         except requests.exceptions.RequestException as exception:
+            end_session()
             print(exception)
             break
