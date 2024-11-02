@@ -73,7 +73,7 @@ class Demand:
         self.priority = 0
 
     def __lt__(self, other):
-        return self.amount < other.amount
+        return self.start_day < other.start_day
 
     def set_priority(self, priority):
         self.priority = priority
