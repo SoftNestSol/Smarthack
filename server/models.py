@@ -1,5 +1,19 @@
-class rafinery:
-    def __init__(self,id, name, capacity, max_output, production, overflow_penalty, underflow_penalty, over_output_penalty, production_cost, production_co2, initial_stock, node_type):
+class Refinery:
+    def __init__(
+        self,
+        id,
+        name,
+        capacity,
+        max_output,
+        production,
+        overflow_penalty,
+        underflow_penalty,
+        over_output_penalty,
+        production_cost,
+        production_co2,
+        initial_stock,
+        node_type,
+    ):
         self.id = id
         self.name = name
         self.capacity = capacity
@@ -16,12 +30,10 @@ class rafinery:
         self.generated_cost = 0
         self.connected_to = []
 
-    
     def refinery_produce(self):
         self.initial_stock += self.production
         self.generated_co2 += self.production_co2
         self.generated_cost += self.production_cost
-
 
     def decrease_stock(self, amount):
         self.initial_stock -= amount
@@ -30,10 +42,21 @@ class rafinery:
         return self.connected_to
 
 
-
-
-class tank:
-    def __init__(self, id, name, capacity, max_input, max_output, overflow_penalty, underflow_penalty, over_input_penalty, over_output_penalty, initial_stock, node_type):
+class Tank:
+    def __init__(
+        self,
+        id,
+        name,
+        capacity,
+        max_input,
+        max_output,
+        overflow_penalty,
+        underflow_penalty,
+        over_input_penalty,
+        over_output_penalty,
+        initial_stock,
+        node_type,
+    ):
         self.id = id
         self.name = name
         self.capacity = capacity
@@ -48,8 +71,7 @@ class tank:
         self.connected_to = []
 
 
-class connection:
-
+class Connection:
     pipeline_costPerDistanceAndVolume = 0.05
     pipeline_co2PerDistanceAndVolume = 0.02
     pipeline_overUsePenaltyPerVolume = 1.13
@@ -67,40 +89,45 @@ class connection:
         self.connection_type = connection_type
         self.max_capacity = max_capacity
 
-    
     def get_movement_cost(self, amount):
         if self.connection_type == "pipeline":
-            return self.distance*amount* self.pipeline_costPerDistanceAndVolume
+            return self.distance * amount * self.pipeline_costPerDistanceAndVolume
         else:
-            return self.distance*amount* self.truck_costPerDistanceAndVolume
-    
+            return self.distance * amount * self.truck_costPerDistanceAndVolume
+
     def get_movement_co2(self, amount):
         if self.connection_type == "pipeline":
-            return self.distance*amount* self.pipeline_co2PerDistanceAndVolume
+            return self.distance * amount * self.pipeline_co2PerDistanceAndVolume
         else:
-            return self.distance*amount* self.truck_co2PerDistanceAndVolume
-    
+            return self.distance * amount * self.truck_co2PerDistanceAndVolume
+
     def get_overuse_penalty(self, amount):
         if self.connection_type == "pipeline":
-            return amount* self.pipeline_overUsePenaltyPerVolume
+            return amount * self.pipeline_overUsePenaltyPerVolume
         else:
-            return amount* self.truck_overUsePenaltyPerVolume
-        
+            return amount * self.truck_overUsePenaltyPerVolume
+
     def move_from_to(self, amount, from_node, to_node):
-        
+
         if to_node.name == "tank":
             to_node.initial_stock += amount
             from_node.decrease_stock(amount)
         else:
             to_node.fulfill(amount)
             from_node.decrease_stock(amount)
-            
-            
 
 
-
-class customers:
-    def __init__(self, id, name, max_input, over_input_penalty, late_delivery_penalty, early_delivery_penalty, node_type):
+class Customer:
+    def __init__(
+        self,
+        id,
+        name,
+        max_input,
+        over_input_penalty,
+        late_delivery_penalty,
+        early_delivery_penalty,
+        node_type,
+    ):
         self.id = id
         self.name = name
         self.max_input = max_input
@@ -110,7 +137,6 @@ class customers:
         self.node_type = node_type
         self.orders = []
 
-
     def add_order(self, order):
         self.orders.append(order)
 
@@ -119,6 +145,3 @@ class customers:
 
     def fully_fullfil_order(self, order):
         self.orders.remove(order)
-
-
-

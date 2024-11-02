@@ -1,14 +1,29 @@
-from fastapi import FastAPI, Header, HTTPException
-import httpx
+import csv
+import os
 
-API_KEY = "7bcd6334-bc2e-4cbf-b9d4-61cb9e868869"
+from models import Refinery, Tank, Customer, Connection
 
-app = FastAPI()
 
-@app.post("start_session")
-async def start_session():
-	async with httpx.AsyncClient() as client:
-		response = await client.get("http://localhost:8080/api/v1/session/start/", headers={"X-API-KEY": API_KEY})
-		data = response.json()
-	
-	return {"message": "Session started", "data": data}
+def read_csv_file(file_name):
+    with open(os.path.join("data", file_name), newline="") as file:
+        reader = csv.DictReader(file, delimiter=";")
+        data = [dict(row) for row in reader]
+    return data
+
+
+if __name__ == "__main__":
+    connections = read_csv_file("connections.csv")
+    customers = read_csv_file("customers.csv")
+    refineries = read_csv_file("refineries.csv")
+    tanks = read_csv_file("tanks.csv")
+
+    # create objects from the data
+    connections = [Connection(**connection) for connection in connections]
+    customers = [Customer(**customer) for customer in customers]
+    refineries = [Refinery(**refinery) for refinery in refineries]
+    tanks = [Tank(**tank) for tank in tanks]
+
+    # print(connections)
+    # print(customers)
+    print(refineries)
+    # print(tanks)
