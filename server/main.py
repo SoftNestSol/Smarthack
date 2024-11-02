@@ -1,11 +1,14 @@
 import csv
+import heapq
 import os
 import requests
 
-from models import Connection, Customer, Demand, Refinery, Tank
+from models import Connection, Customer, Demand, Movement, Refinery, Tank
 
 API_KEY = "7bcd6334-bc2e-4cbf-b9d4-61cb9e868869"
 API_URL = "http://localhost:8080/api/v1"
+
+demands_queue = []
 
 
 def read_csv_file(file_name):
@@ -20,11 +23,30 @@ def end_session():
     requests.post(url, headers={"API-KEY": API_KEY})
 
 
-def solve(response):
+def get_movements(response):
+    if "demand" not in response:
+        return []
+
+    demands = [Demand(**demand) for demand in response["demand"]]
+    for demand in demands:
+        heapq.heappush(demands_queue, demand)
+
+    movements = []
+    for demand in demands_queue:
+        for connection in connections:
+            if connection.to_id == demand.customer_id:
+                movement = {"connectionId": connection.id, "amount": demand.amount}
+                movements.append(movement)
+                break
+        heapq.heappop(demands_queue)
+
     print(response["totalKpis"])
+    return movements
 
 
 if __name__ == "__main__":
+    heapq.heapify(demands_queue)
+
     connections = read_csv_file("connections.csv")
     customers = read_csv_file("customers.csv")
     refineries = read_csv_file("refineries.csv")
@@ -38,22 +60,13 @@ if __name__ == "__main__":
     url = API_URL + "/session/start"
     session_id = requests.post(url, headers={"API-KEY": API_KEY}).content
 
+    movements = []
     day = 0
-    response = None
 
     while True:
-        if day > 43:
+        if day > 42:
             end_session()
             break
-
-        if day > 0:
-            solve(dict(response.json()))
-            break
-
-        data = {
-            "day": day,
-            "movements": [],
-        }
 
         try:
             url = API_URL + "/play/round"
@@ -62,7 +75,12 @@ if __name__ == "__main__":
                 "SESSION-ID": session_id,
                 "Content-Type": "application/json",
             }
+            data = {
+                "day": day,
+                "movements": movements,
+            }
             response = requests.post(url, headers=headers, json=data)
+            movements = get_movements(dict(response.json()))
             day = day + 1
 
         except requests.exceptions.RequestException as exception:

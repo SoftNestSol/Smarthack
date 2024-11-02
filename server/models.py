@@ -1,3 +1,87 @@
+class Connection:
+    pipeline_costPerDistanceAndVolume = 0.05
+    pipeline_co2PerDistanceAndVolume = 0.02
+    pipeline_overUsePenaltyPerVolume = 1.13
+
+    truck_costPerDistanceAndVolume = 0.42
+    truck_co2PerDistanceAndVolume = 0.31
+    truck_overUsePenaltyPerVolume = 0.73
+
+    def __init__(self, id, from_id, to_id, distance, lead_time_days, connection_type, max_capacity):
+        self.id = id
+        self.from_id = from_id
+        self.to_id = to_id
+        self.distance = distance
+        self.lead_time_days = lead_time_days
+        self.connection_type = connection_type
+        self.max_capacity = max_capacity
+
+    def get_movement_cost(self, amount):
+        if self.connection_type == "pipeline":
+            return self.distance * amount * self.pipeline_costPerDistanceAndVolume
+        else:
+            return self.distance * amount * self.truck_costPerDistanceAndVolume
+
+    def get_movement_co2(self, amount):
+        if self.connection_type == "pipeline":
+            return self.distance * amount * self.pipeline_co2PerDistanceAndVolume
+        else:
+            return self.distance * amount * self.truck_co2PerDistanceAndVolume
+
+    def get_overuse_penalty(self, amount):
+        if self.connection_type == "pipeline":
+            return amount * self.pipeline_overUsePenaltyPerVolume
+        else:
+            return amount * self.truck_overUsePenaltyPerVolume
+
+    def move_from_to(self, amount, from_node, to_node):
+        if to_node.name == "tank":
+            to_node.initial_stock += amount
+            from_node.decrease_stock(amount)
+        else:
+            to_node.fulfill(amount)
+            from_node.decrease_stock(amount)
+
+
+class Customer:
+    def __init__(
+        self,
+        id,
+        name,
+        max_input,
+        over_input_penalty,
+        late_delivery_penalty,
+        early_delivery_penalty,
+        node_type,
+    ):
+        self.id = id
+        self.name = name
+        self.max_input = max_input
+        self.over_input_penalty = over_input_penalty
+        self.late_delivery_penalty = late_delivery_penalty
+        self.early_delivery_penalty = early_delivery_penalty
+        self.node_type = node_type
+
+
+class Demand:
+    def __init__(self, customerId, amount, postDay, startDay, endDay):
+        self.customer_id = customerId
+        self.amount = amount
+        self.post_day = postDay
+        self.start_day = startDay
+        self.end_day = endDay
+        self.priority = 0
+
+    def __lt__(self, other):
+        return self.amount < other.amount
+
+    def set_priority(self, priority):
+        self.priority = priority
+
+    def partially_fullfill(self, amount):
+        self.amount -= amount
+
+
 class Refinery:
     def __init__(
         self,
@@ -69,85 +153,3 @@ class Tank:
         self.initial_stock = initial_stock
         self.node_type = node_type
         self.connected_to = []
-
-
-class Connection:
-    pipeline_costPerDistanceAndVolume = 0.05
-    pipeline_co2PerDistanceAndVolume = 0.02
-    pipeline_overUsePenaltyPerVolume = 1.13
-
-    truck_costPerDistanceAndVolume = 0.42
-    truck_co2PerDistanceAndVolume = 0.31
-    truck_overUsePenaltyPerVolume = 0.73
-
-    def __init__(self, id, from_id, to_id, distance, lead_time_days, connection_type, max_capacity):
-        self.id = id
-        self.from_id = from_id
-        self.to_id = to_id
-        self.distance = distance
-        self.lead_time_days = lead_time_days
-        self.connection_type = connection_type
-        self.max_capacity = max_capacity
-
-    def get_movement_cost(self, amount):
-        if self.connection_type == "pipeline":
-            return self.distance * amount * self.pipeline_costPerDistanceAndVolume
-        else:
-            return self.distance * amount * self.truck_costPerDistanceAndVolume
-
-    def get_movement_co2(self, amount):
-        if self.connection_type == "pipeline":
-            return self.distance * amount * self.pipeline_co2PerDistanceAndVolume
-        else:
-            return self.distance * amount * self.truck_co2PerDistanceAndVolume
-
-    def get_overuse_penalty(self, amount):
-        if self.connection_type == "pipeline":
-            return amount * self.pipeline_overUsePenaltyPerVolume
-        else:
-            return amount * self.truck_overUsePenaltyPerVolume
-
-    def move_from_to(self, amount, from_node, to_node):
-
-        if to_node.name == "tank":
-            to_node.initial_stock += amount
-            from_node.decrease_stock(amount)
-        else:
-            to_node.fulfill(amount)
-            from_node.decrease_stock(amount)
-
-
-class Demand:
-    def __init__(self, customer_id, amount, post_day, start_day, end_day):
-        self.customer_id = customer_id
-        self.amount = amount
-        self.post_day = post_day
-        self.start_day = start_day
-        self.end_day = end_day
-        self.priority = 0
-
-    def set_priority(self, priority):
-        self.priority = priority
-
-    def partially_fullfill(self, amount):
-        self.amount -= amount
-
-
-class Customer:
-    def __init__(
-        self,
-        id,
-        name,
-        max_input,
-        over_input_penalty,
-        late_delivery_penalty,
-        early_delivery_penalty,
-        node_type,
-    ):
-        self.id = id
-        self.name = name
-        self.max_input = max_input
-        self.over_input_penalty = over_input_penalty
-        self.late_delivery_penalty = late_delivery_penalty
-        self.early_delivery_penalty = early_delivery_penalty
-        self.node_type = node_type
