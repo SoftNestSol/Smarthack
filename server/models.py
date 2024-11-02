@@ -73,7 +73,7 @@ class connection:
         if self.connection_type == "pipeline":
             return self.distance*amount* self.pipeline_co2PerDistanceAndVolume
         else:
-            return self.distance*amount* self.truck_co2PerDistanceAndVolumes
+            return self.distance*amount* self.truck_co2PerDistanceAndVolume
     
     def get_overuse_penalty(self, amount):
         if self.connection_type == "pipeline":
@@ -87,6 +87,8 @@ class connection:
         
         if to_node.name == "customer":
             to_node.fulfill(amount)
+
+        return amount, from_node.id, to_node.id
             
 
 
