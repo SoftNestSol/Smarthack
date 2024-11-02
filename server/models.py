@@ -117,6 +117,29 @@ class Connection:
             from_node.decrease_stock(amount)
 
 
+
+
+class Demand:
+
+    def __init__(self, customer_id, amount, post_day, start_day, end_day):
+        self.customer_id = customer_id
+        self.amount = amount
+        self.post_day = post_day
+        self.start_day = start_day
+        self.end_day = end_day
+        self.priority = 0
+
+    def set_priority(self, priority):
+        self.priority = priority
+
+
+    def partially_fullfill(self, amount):
+        self.amount -= amount
+
+    
+
+
+
 class Customer:
     def __init__(
         self,
@@ -135,13 +158,3 @@ class Customer:
         self.late_delivery_penalty = late_delivery_penalty
         self.early_delivery_penalty = early_delivery_penalty
         self.node_type = node_type
-        self.orders = []
-
-    def add_order(self, order):
-        self.orders.append(order)
-
-    def partially_fullfil_order(self, order, amount):
-        order.amount -= amount
-
-    def fully_fullfil_order(self, order):
-        self.orders.remove(order)
