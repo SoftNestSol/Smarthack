@@ -14,6 +14,7 @@ class rafinery:
         self.node_type = node_type
         self.generated_co2 = 0
         self.generated_cost = 0
+        self.connected_to = []
 
     
     def refinery_produce(self):
@@ -24,6 +25,9 @@ class rafinery:
 
     def decrease_stock(self, amount):
         self.initial_stock -= amount
+
+    def get_connections(self):
+        return self.connected_to
 
 
 
@@ -41,6 +45,7 @@ class tank:
         self.over_output_penalty = over_output_penalty
         self.initial_stock = initial_stock
         self.node_type = node_type
+        self.connected_to = []
 
 
 class connection:
@@ -82,13 +87,14 @@ class connection:
             return amount* self.truck_overUsePenaltyPerVolume
         
     def move_from_to(self, amount, from_node, to_node):
-        from_node.decrease_stock(amount)
-        to_node.initial_stock += amount
         
-        if to_node.name == "customer":
+        if to_node.name == "tank":
+            to_node.initial_stock += amount
+            from_node.decrease_stock(amount)
+        else:
             to_node.fulfill(amount)
-
-        return amount, from_node.id, to_node.id
+            from_node.decrease_stock(amount)
+            
             
 
 
@@ -105,14 +111,14 @@ class customers:
         self.orders = []
 
 
-    def fulfill(self, amount):
-        for order in self.orders:
-            if order.amount > amount:
-                order.amount -= amount
-                break
-            else:
-                amount -= order.amount
-                self.orders.remove(order)
+    def add_order(self, order):
+        self.orders.append(order)
+
+    def partially_fullfil_order(self, order, amount):
+        order.amount -= amount
+
+    def fully_fullfil_order(self, order):
+        self.orders.remove(order)
 
 
 
