@@ -11,7 +11,7 @@ class Connection:
         self.id = id
         self.from_id = from_id
         self.to_id = to_id
-        self.distance = distance
+        self.distance = float(distance)
         self.lead_time_days = lead_time_days
         self.connection_type = connection_type
         self.max_capacity = max_capacity
@@ -70,13 +70,11 @@ class Demand:
         self.post_day = postDay
         self.start_day = startDay
         self.end_day = endDay
-        self.priority = 0
+        self.cost = 0
+        self.co2 = 0
 
     def __lt__(self, other):
-        return self.start_day < other.start_day
-
-    def set_priority(self, priority):
-        self.priority = priority
+        return self.start_day < other.start_day or self.cost < other.cost or self.co2 < other.co2
 
     def partially_fullfill(self, amount):
         self.amount -= amount
@@ -143,13 +141,13 @@ class Tank:
     ):
         self.id = id
         self.name = name
-        self.capacity = capacity
+        self.capacity = int(capacity)
         self.max_input = max_input
         self.max_output = max_output
         self.overflow_penalty = overflow_penalty
         self.underflow_penalty = underflow_penalty
         self.over_input_penalty = over_input_penalty
         self.over_output_penalty = over_output_penalty
-        self.initial_stock = initial_stock
+        self.initial_stock = int(initial_stock)
         self.node_type = node_type
         self.connected_to = []
