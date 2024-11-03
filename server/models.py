@@ -11,10 +11,10 @@ class Connection:
         self.id = id
         self.from_id = from_id
         self.to_id = to_id
-        self.distance = float(distance)
-        self.lead_time_days = lead_time_days
+        self.distance = int(distance)
+        self.lead_time_days = int(lead_time_days)
         self.connection_type = connection_type
-        self.max_capacity = max_capacity
+        self.max_capacity = int(max_capacity)
 
     def get_movement_cost(self, amount):
         if self.connection_type == "pipeline":
@@ -67,6 +67,7 @@ class Demand:
     def __init__(self, customerId, amount, postDay, startDay, endDay):
         self.customer_id = customerId
         self.amount = amount
+        self.total_amount = amount
         self.post_day = postDay
         self.start_day = startDay
         self.end_day = endDay
@@ -98,15 +99,15 @@ class Refinery:
     ):
         self.id = id
         self.name = name
-        self.capacity = capacity
-        self.max_output = max_output
-        self.production = production
+        self.capacity = int(capacity)
+        self.max_output = int(max_output)
+        self.production = int(production)
         self.overflow_penalty = overflow_penalty
-        self.underflow_penalty = underflow_penalty
+        self.underflow_penalty = float(underflow_penalty)
         self.over_output_penalty = over_output_penalty
-        self.production_cost = production_cost
-        self.production_co2 = production_co2
-        self.initial_stock = initial_stock
+        self.production_cost = float(production_cost)
+        self.production_co2 = float(production_co2)
+        self.initial_stock = int(initial_stock)
         self.node_type = node_type
         self.generated_co2 = 0
         self.generated_cost = 0

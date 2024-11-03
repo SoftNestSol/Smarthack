@@ -57,9 +57,26 @@ def get_graph_without_customers(connections, customers):
 
 
 def fill_tanks(tanks, demanded_tanks):
-    demanded_tanks.sort(key=lambda x: x[0], reverse=True)
+    demanded_tanks = sorted(demanded_tanks, key=lambda x: x[0], reverse=True)
+    for count, tank in demanded_tanks:
+        tank_id = None
+        tank_cost = 0x3F3F3F3F
+        for refinery in refineries:
+            shortest_path = shortest_paths_for_refineries[refinery.id]
+            for path in shortest_path:
+                if path[0] == tank.id and path[1] < tank_cost:
+                    tank_id = refinery.id
+                    tank_cost = path[1]
+                    break
+        if tank_id is None:
+            continue
+        for connection in connections:
+            if connection.from_id == tank_id and connection.to_id == tank.id:
+                break
+        if connection is None:
+            continue
 
-    return demanded_tanks
+    return movements
 
 
 def get_movements(response):
@@ -144,7 +161,6 @@ def get_movements(response):
                 continue
 
             closest_tanks[0].initial_stock -= demand.amount
-
             movement = {"connectionId": connection.id, "amount": demand.amount}
             movements.append(movement)
 
@@ -179,7 +195,7 @@ def get_movements(response):
             movement = {"connectionId": connection_one.id, "amount": demand.amount}
             movements.append(movement)
 
-    fill_tanks(tanks, demanded_tanks)
+    # movements += fill_tanks(tanks, demanded_tanks)
     print(response["totalKpis"])
     return movements
 
